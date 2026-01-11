@@ -22,42 +22,4 @@ class RAGPipeline:
         relevant_chunks = [self.texts[i] for i in top_indices]
         
         # Extract answer from relevant chunks without losing data
-        answer = self._extract_answer_from_chunks(relevant_chunks, question)
-        return answer
-
-    def _extract_answer_from_chunks(self, chunks, question):
-        """Extract answer from multiple chunks without data loss"""
-        question_lower = question.lower()
-        
-        # Look for specific data patterns based on question
-        if any(word in question_lower for word in ['count', 'number', 'how many']):
-            return self._extract_counts(chunks, question)
-        elif 'year' in question_lower or '2022' in question_lower:
-            return self._extract_year_data(chunks, question)
-        else:
-            # Return the most relevant chunks as-is
-            return f"Most relevant data found:\n\n" + "\n\n---\n\n".join(chunks[:3])
-
-    def _extract_counts(self, chunks, question):
-        """Extract count-related information"""
-        results = []
-        for chunk in chunks:
-            if 'mortgage' in question.lower() and 'mortgage' in chunk.lower():
-                results.append(f"Relevant data chunk:\n{chunk}")
-        
-        if results:
-            return "\n\n---\n\n".join(results)
-        else:
-            return f"Found {len(chunks)} relevant data chunks, but no specific mortgage counts. Here's the most relevant data:\n\n{chunks[0] if chunks else 'No data found'}"
-
-    def _extract_year_data(self, chunks, question):
-        """Extract year-specific information"""
-        year_chunks = []
-        for chunk in chunks:
-            if '2022' in chunk or 'year' in chunk.lower():
-                year_chunks.append(chunk)
-        
-        if year_chunks:
-            return f"Data for year 2022:\n\n" + "\n\n---\n\n".join(year_chunks)
-        else:
-            return f"Most relevant chunks (may contain year data):\n\n" + "\n\n---\n\n".join(chunks[:2])
+        return relevant_chunks
