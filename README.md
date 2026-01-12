@@ -1,79 +1,64 @@
-# RAG Pipeline Project
-
-A Retrieval-Augmented Generation (RAG) pipeline implementation for CS 6365 Real-Time Systems coursework.
+# SoQL Query Generation with RAG
 
 ## Overview
 
-This project implements a RAG system that combines document retrieval with language generation to provide contextually relevant responses. The pipeline uses vector databases for efficient document storage and retrieval, paired with language models for generating accurate responses.
-
-## Features (TBD)
-
-- Document ingestion and preprocessing with `unstructured`
-- Vector embeddings and similarity search using `chromadb` and `faiss-cpu`
-- Integration with OpenAI's language models via `openai`
-- Modular pipeline architecture with `langchain`
-- Token management and optimization with `tiktoken`
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.gatech.edu/vmanivannan35/RAG-Pipeline.git
-cd RAG-Project
+1. (Recommended) Create and activate a virtual environment:
+
+```
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-2. Create and activate the virtual environment:
-```bash
-python -m venv rag-env
-# On Windows:
-rag-env\Scripts\activate
-# On macOS/Linux:
-source rag-env/bin/activate
-```
+2. Install dependencies:
 
-3. Install dependencies:
-```bash
+```
 pip install -r requirements.txt
 ```
 
-## Dependencies
+## Environment Variables
 
-The project uses the following key packages (see [requirements.txt](requirements.txt)):
-
-- **openai**: OpenAI API integration for language models
-- **langchain**: Framework for building LLM applications
-- **chromadb**: Vector database for document storage and retrieval
-- **tiktoken**: Token counting and management
-- **unstructured**: Document parsing and preprocessing
-- **faiss-cpu**: Efficient similarity search and clustering
-
-## Usage
-
-1. Ensure your virtual environment is activated
-2. Set up your OpenAI API key as an environment variable:
-```bash
-export OPENAI_API_KEY="your-api-key-here"
-```
-
-3. Run the RAG pipeline:
-```bash
-python main.py  # (when implemented)
-```
-
-## Project Structure
+Edit the `.env` file in the project root directory with the following contents:
 
 ```
-RAG-Project/
-├── README.md           # This file
-├── requirements.txt    # Python dependencies
-├── .gitignore         # Git ignore rules
-└── rag-env/           # Virtual environment (excluded from git)
+OPENROUTER_API_KEY=your_openrouter_api_key
+SOCRATA_APP_TOKEN=your_socrata_app_token
 ```
 
-## Contributing
+LLM API
 
-This is a coursework project for CS 6365 Real-Time Systems. Please follow academic integrity guidelines when contributing.
+* This project utilizes the [Openrouter API](https://openrouter.ai/) for making queries to LLMs.
+* You can make an account on the website to obtain an **API KEY** to store in your .env file and utilize several free models.
 
-## License
+Chicago Crimes API
 
-Educational use only - CS 6365 coursework project.
+* The project accesses the [Chicago Crimes Dataset](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/about_data) via the [Socrata API](https://dev.socrata.com/foundry/data.cityofchicago.org/ijzp-q8t2) (v2.0)
+* To get started, first make an account on the [City of Chicago](https://data.cityofchicago.org/) website.
+* Once you make a profile, head to [developer settings](https://data.cityofchicago.org/profile/edit/developer_settings) and create a new **APP TOKEN** and store it in your .env file. Note that you need the APP TOKEN not the SECRET TOKEN
+
+## Dataset
+
+The file `data/combined_dataset.csv` is used **only as retrieval context**.
+
+Each row typically contains:
+- A natural language query
+- Corresponding SoQL parameters
+- Schema information
+- Optional IUCR context
+
+## Running the Project
+
+From the project root directory:
+
+python main.py
+
+
+You will be prompted to enter a natural language question.
+
+The program will:
+- Retrieve relevant context rows
+- Print the retrieved examples
+- Generate SoQL parameters using the language model
+- Execute the query and display results

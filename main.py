@@ -5,11 +5,53 @@ import requests
 import json
 from Crime_API import run_query
 import re
+from dotenv import load_dotenv
 
 # API Information
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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"
 MODEL = "mistralai/devstral-2512:free"
+
+def print_chunk_as_row(chunk):
+    lines = [ln for ln in chunk.splitlines() if ln.strip()]
+    if not lines:
+        return
+
+    row_line = lines[-1]
+
+    row_num = None
+    m_row = re.match(r"^(\d+)\s+", row_line)
+    if m_row:
+        row_num = m_row.group(1)
+        row_line = row_line[m_row.end():]
+
+    m = re.search(r"\{.*\}", row_line)
+    if not m:
+        print("Row:")
+        print("  (unparseable chunk)")
+        return
+
+    nl_query = row_line[:m.start()].strip()
+    soql_str = m.group(0).strip()
+    tail = row_line[m.end():].strip()
+
+    parts = [p.strip() for p in re.split(r"\s{2,}", tail) if p.strip()]
+    schema = parts[0] if len(parts) >= 1 else ""
+    iucr_context = parts[1] if len(parts) >= 2 else ""
+
+    if iucr_context.lower() == "nan":
+        iucr_context = ""
+
+    try:
+        soql_pretty = json.dumps(json.loads(soql_str), indent=2)
+    except json.JSONDecodeError:
+        soql_pretty = soql_str
+
+    print(f"Row: {row_num if row_num is not None else ''}")
+    print(f"NL_QUERY:\n  {nl_query}")
+    print("SOQL_PARAMS:")
+    print(soql_pretty)
+    print(f"SCHEMA:\n  {schema}")
+    print(f"IUCR_CONTEXT:\n  {iucr_context}")
 
 def test_llm_api():
     question = "What is the capital of France?"
@@ -18,7 +60,7 @@ def test_llm_api():
     print("LLM API Test Response:\n", response)
 
 def query_llm_api(question, context):
-    # API_KEY = os.getenv("OPENROUTER_API_KEY")
+    API_KEY = os.getenv("OPENROUTER_API_KEY")
     
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -53,6 +95,10 @@ def query_llm_api(question, context):
 
 def main():
     print("Entering Main")
+    
+    print("Loading environment variables from .env file")
+    load_dotenv()
+    
     docs_dir = "data"
     texts = load_documents(docs_dir)
     if not texts:
@@ -60,24 +106,27 @@ def main():
         return
 
     rag = RAGPipeline(texts)
-    question = input("Enter your question: ")
+    question = input("\nEnter your question: ")
     answer = rag.query(question)
-    print("\nAnswer:\n", answer)
+    
+    print("\nRetrived "+ str(len(answer)) + " relevant chunks from RAG Pipeline.")
+    
+    for i, chunk in enumerate(answer, 1):
+        
+        print(f"\nChunk {i}:")
+        print_chunk_as_row(chunk)
     
     # Append Question to the answer for context
     llm_answer = query_llm_api(question, "\n\n".join(answer))
     print("\nLLM Response:\n", llm_answer)
-    
-    # Extract json in {} and run the query
-    
+        
     output_df = None
     
     json_str = re.search(r"\{.*\}", llm_answer, re.DOTALL)
     if json_str:
         soql_params = json.loads(json_str.group())
-        output_df = run_query(soql_params)
+        output_df = run_query(soql_params, 10)
         
-        # Print top 5 rows of the dataframe
         if output_df is not None:
             print("\nQuery Result (top 5 rows):\n", output_df.head())
         else:

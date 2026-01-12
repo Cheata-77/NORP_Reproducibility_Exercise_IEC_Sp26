@@ -11,7 +11,6 @@ class RAGPipeline:
         
         # Use a simpler approach to avoid memory issues
         self.model_type = 'extraction'  # Use extraction instead of generation
-        print("Using: keyword extraction (no data loss)")
 
     def query(self, question, top_k=5):  # Increase top_k to get more relevant chunks
         question_embedding = self.embedder.encode([question], convert_to_tensor=True)
