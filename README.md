@@ -41,6 +41,7 @@ LLM API
 
 * This project utilizes the [Openrouter API](https://openrouter.ai/) for making queries to LLMs.
 * You can make an account on the website to obtain an **API KEY** to store in your .env file and utilize several free models.
+* The default model used is "mistralai/devstral-2512:free", but feel free to change it in the `main.py` file.
 
 Chicago Crimes API
 
@@ -90,19 +91,12 @@ Your queries should vary in structure and complexity. For each query, briefly no
 - The generated SoQL parameters were valid
 - The final API query produced meaningful results
 
-### 3. LLM Exploration
-Using OpenRouter, test multiple free language models.
-
-For each model, briefly describe:
-- How well it followed the output constraints
-- Any noticeable differences in behavior across models
-
-### 4. Observations and Failure Cases
+### 3. Observations and Failure Cases
 Discuss cases where the system did not work as expected.
 
 This may include certain types of queries that fail, inconsistencies between retrieval and generation, or cases where insufficient context is returned. Provide brief explanations based on your observations.
 
-### 5. Directions for Improvement
+### 4. Directions for Improvement
 Suggest directions for improving the system. Focus on high-level ideas related to retrieval, dataset design, prompting, or evaluation rather than implementation details.
 
 ## Contributing
